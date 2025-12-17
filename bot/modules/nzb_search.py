@@ -1,6 +1,7 @@
 from xml.etree import ElementTree as ET
 from aiohttp import ClientSession
 
+from ..helper.i18n import t
 from .. import LOGGER
 from ..core.config_manager import Config
 from ..helper.ext_utils.bot_utils import new_task
@@ -16,16 +17,16 @@ async def hydra_search(_, message):
     if len(key) == 1:
         await send_message(
             message,
-            "Please provide a search query. Example: `/nzbsearch movie title`.",
+            t("errors.nzb_search_example"),
         )
         return
 
     query = " ".join(key[1:]).strip()
-    message = await send_message(message, f"Searching for '{query}'...")
+    message = await send_message(message, t("misc.searching_for", query=query))
     try:
         items = await search_nzbhydra(query)
         if not items:
-            await edit_message(message, "No results found.")
+            await edit_message(message, t("misc.no_results_found"))
             LOGGER.info(f"No results found for search query: {query}")
             return
 
@@ -35,12 +36,12 @@ async def hydra_search(_, message):
         button = buttons.build_menu()
         await edit_message(
             message,
-            f"Search results for '{query}' are available here",
+            t("misc.search_results_available", query=query),
             button,
         )
     except Exception as e:
         LOGGER.error(f"Error in hydra_search: {e!s}")
-        await edit_message(message, "Something went wrong.")
+        await edit_message(message, t("misc.something_went_wrong"))
 
 
 async def search_nzbhydra(query, limit=50):

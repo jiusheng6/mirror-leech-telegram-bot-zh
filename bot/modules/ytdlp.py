@@ -6,6 +6,7 @@ from pyrogram.handlers import CallbackQueryHandler
 from time import time
 from yt_dlp import YoutubeDL
 
+from ..helper.i18n import t
 from .. import LOGGER, bot_loop, task_dict_lock, DOWNLOAD_DIR
 from ..core.config_manager import Config
 from ..helper.ext_utils.bot_utils import (
@@ -47,7 +48,7 @@ async def select_format(_, query, obj):
     elif data[1] == "back":
         await obj.back_to_main()
     elif data[1] == "cancel":
-        await edit_message(message, "Task has been cancelled.")
+        await edit_message(message, t("misc.task_cancelled"))
         obj.qual = None
         obj.listener.is_cancelled = True
         obj.event.set()
@@ -85,7 +86,7 @@ class YtSelection:
         try:
             await wait_for(self.event.wait(), timeout=self._timeout)
         except:
-            await edit_message(self._reply_to, "Timed Out. Task has been cancelled!")
+            await edit_message(self._reply_to, t("errors.timed_out_cancelled"))
             self.qual = None
             self.listener.is_cancelled = True
             self.event.set()

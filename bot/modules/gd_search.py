@@ -1,3 +1,4 @@
+from ..helper.i18n import t
 from .. import LOGGER, user_data
 from ..helper.ext_utils.bot_utils import (
     sync_to_async,
@@ -65,20 +66,20 @@ async def select_type(_, query):
     key = message.reply_to_message.text.split(maxsplit=1)[1].strip()
     data = query.data.split()
     if user_id != int(data[1]):
-        return await query.answer(text="Not Yours!", show_alert=True)
+        return await query.answer(text=t("notify.not_yours"), show_alert=True)
     elif data[2] == "rec":
         await query.answer()
         is_recursive = not bool(eval(data[3]))
         buttons = await list_buttons(user_id, is_recursive, eval(data[4]))
-        return await edit_message(message, "Choose list options:", buttons)
+        return await edit_message(message, t("search.list_options"), buttons)
     elif data[2] == "ut":
         await query.answer()
         user_token = not bool(eval(data[4]))
         buttons = await list_buttons(user_id, eval(data[3]), user_token)
-        return await edit_message(message, "Choose list options:", buttons)
+        return await edit_message(message, t("search.list_options"), buttons)
     elif data[2] == "cancel":
         await query.answer()
-        return await edit_message(message, "list has been canceled!")
+        return await edit_message(message, t("search.list_cancelled"))
     await query.answer()
     item_type = data[2]
     is_recursive = eval(data[3])
@@ -90,10 +91,10 @@ async def select_type(_, query):
 @new_task
 async def gdrive_search(_, message):
     if len(message.text.split()) == 1:
-        return await send_message(message, "Send a search key along with command")
+        return await send_message(message, t("search.send_search_key"))
     user_id = message.from_user.id
     buttons = await list_buttons(user_id)
-    await send_message(message, "Choose list options:", buttons)
+    await send_message(message, t("search.list_options"), buttons)
 
 
 
