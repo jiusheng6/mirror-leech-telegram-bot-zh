@@ -14,7 +14,7 @@ from pyrogram.filters import create
 from pyrogram.handlers import MessageHandler
 from time import time
 
-from ..helper.i18n import t
+from ..helper.i18n import t, set_language
 
 from .. import (
     LOGGER,
@@ -66,6 +66,7 @@ DEFAULT_VALUES = {
     "SEARCH_LIMIT": 0,
     "UPSTREAM_BRANCH": "master",
     "DEFAULT_UPLOAD": "rc",
+    "LANGUAGE": "zh-CN",
 }
 
 
@@ -334,6 +335,8 @@ async def edit_variable(_, message, pre_message, key):
         await jdownloader.boot()
     elif key == "RSS_DELAY":
         add_job()
+    elif key == "LANGUAGE":
+        set_language(value)
     elif key == "USET_SERVERS":
         for s in value:
             await sabnzbd_client.set_special_config("servers", s)
