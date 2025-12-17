@@ -1,3 +1,4 @@
+from ..helper.i18n import t
 from .. import (
     task_dict,
     task_dict_lock,
@@ -23,13 +24,13 @@ async def remove_from_queue(_, message):
         gid = msg[2] if status else msg[1]
         task = await get_task_by_gid(gid)
         if task is None:
-            await send_message(message, f"GID: <code>{gid}</code> Not Found.")
+            await send_message(message, t("errors.gid_not_found", gid=gid))
             return
     elif reply_to_id := message.reply_to_message_id:
         async with task_dict_lock:
             task = task_dict.get(reply_to_id)
         if task is None:
-            await send_message(message, "This is not an active task!")
+            await send_message(message, t("errors.not_active_task"))
             return
     elif len(msg) in {1, 2}:
         msg = f"""Reply to an active Command message which was used to start the download/upload.
@@ -49,7 +50,7 @@ By reply to task cmd:
         and task.listener.user_id != user_id
         and (user_id not in user_data or not user_data[user_id].get("SUDO"))
     ):
-        await send_message(message, "This task is not for you!")
+        await send_message(message, t("errors.task_not_yours"))
         return
     listener = task.listener
     msg = ""
@@ -58,26 +59,26 @@ By reply to task cmd:
             listener.force_upload = True
             if listener.mid in queued_up:
                 await start_up_from_queued(listener.mid)
-                msg = "Task have been force started to upload!"
+                msg = t("tasks.force_started_upload")
             else:
-                msg = "Force upload enabled for this task!"
+                msg = t("tasks.force_upload_enabled")
         elif status == "fd":
             listener.force_download = True
             if listener.mid in queued_dl:
                 await start_dl_from_queued(listener.mid)
-                msg = "Task have been force started to download only!"
+                msg = t("tasks.force_started_download_only")
             else:
-                msg = "This task not in download queue!"
+                msg = t("tasks.not_in_download_queue")
         else:
             listener.force_download = True
             listener.force_upload = True
             if listener.mid in queued_up:
                 await start_up_from_queued(listener.mid)
-                msg = "Task have been force started to upload!"
+                msg = t("tasks.force_started_upload")
             elif listener.mid in queued_dl:
                 await start_dl_from_queued(listener.mid)
-                msg = "Task have been force started to download and upload will start once download finish!"
+                msg = t("tasks.force_started_download")
             else:
-                msg = "This task not in queue!"
+                msg = t("errors.not_in_queue")
     if msg:
         await send_message(message, msg)

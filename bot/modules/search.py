@@ -2,6 +2,7 @@ from httpx import AsyncClient
 from html import escape
 from urllib.parse import quote
 
+from ..helper.i18n import t
 from .. import LOGGER
 from ..core.config_manager import Config
 from ..core.torrent_manager import TorrentManager
@@ -226,28 +227,28 @@ async def torrent_search(_, message):
     key = message.text.split()
     if SITES is None and not Config.SEARCH_PLUGINS:
         await send_message(
-            message, "No API link or search PLUGINS added for this function"
+            message, t("search.no_api_or_plugins")
         )
     elif len(key) == 1 and SITES is None:
-        await send_message(message, "Send a search key along with command")
+        await send_message(message, t("search.send_search_key"))
     elif len(key) == 1:
         buttons.data_button("Trending", f"torser {user_id} apitrend")
         buttons.data_button("Recent", f"torser {user_id} apirecent")
         buttons.data_button("Cancel", f"torser {user_id} cancel")
         button = buttons.build_menu(2)
-        await send_message(message, "Send a search key along with command", button)
+        await send_message(message, t("search.send_search_key"), button)
     elif SITES is not None and Config.SEARCH_PLUGINS:
         buttons.data_button("Api", f"torser {user_id} apisearch")
         buttons.data_button("Plugins", f"torser {user_id} plugin")
         buttons.data_button("Cancel", f"torser {user_id} cancel")
         button = buttons.build_menu(2)
-        await send_message(message, "Choose tool to search:", button)
+        await send_message(message, t("search.choose_tool"), button)
     elif SITES is not None:
         button = api_buttons(user_id, "apisearch")
-        await send_message(message, "Choose site to search | API:", button)
+        await send_message(message, t("search.choose_site_api"), button)
     else:
         button = await plugin_buttons(user_id)
-        await send_message(message, "Choose site to search | Plugins:", button)
+        await send_message(message, t("search.choose_site_plugins"), button)
 
 
 @new_task
@@ -258,15 +259,15 @@ async def torrent_search_update(_, query):
     key = key[1].strip() if len(key) > 1 else None
     data = query.data.split()
     if user_id != int(data[1]):
-        await query.answer("Not Yours!", show_alert=True)
+        await query.answer(t("notify.not_yours"), show_alert=True)
     elif data[2].startswith("api"):
         await query.answer()
         button = api_buttons(user_id, data[2])
-        await edit_message(message, "Choose site:", button)
+        await edit_message(message, t("search.choose_site"), button)
     elif data[2] == "plugin":
         await query.answer()
         button = await plugin_buttons(user_id)
-        await edit_message(message, "Choose site:", button)
+        await edit_message(message, t("search.choose_site"), button)
     elif data[2] != "cancel":
         await query.answer()
         site = data[2]
@@ -294,4 +295,4 @@ async def torrent_search_update(_, query):
         await search(key, site, message, method)
     else:
         await query.answer()
-        await edit_message(message, "Search has been canceled!")
+        await edit_message(message, t("search.search_cancelled"))

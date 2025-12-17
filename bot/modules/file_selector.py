@@ -1,6 +1,7 @@
 from aiofiles.os import remove, path as aiopath
 from asyncio import iscoroutinefunction
 
+from ..helper.i18n import t
 from .. import (
     task_dict,
     task_dict_lock,
@@ -25,7 +26,7 @@ from ..helper.telegram_helper.message_utils import (
 @new_task
 async def select(_, message):
     if not Config.BASE_URL:
-        await send_message(message, "Base URL not defined!")
+        await send_message(message, t("errors.base_url_not_defined"))
         return
     user_id = message.from_user.id
     msg = message.text.split()
@@ -33,20 +34,16 @@ async def select(_, message):
         gid = msg[1]
         task = await get_task_by_gid(gid)
         if task is None:
-            await send_message(message, f"GID: <code>{gid}</code> Not Found.")
+            await send_message(message, t("errors.gid_not_found", gid=gid))
             return
     elif reply_to_id := message.reply_to_message_id:
         async with task_dict_lock:
             task = task_dict.get(reply_to_id)
         if task is None:
-            await send_message(message, "This is not an active task!")
+            await send_message(message, t("errors.not_active_task"))
             return
     elif len(msg) == 1:
-        msg = (
-            "Reply to an active /cmd which was used to start the download or add gid along with cmd\n\n"
-            + "This command mainly for selection incase you decided to select files from already added torrent/nzb. "
-            + "But you can always use /cmd with arg `s` to select files before download start."
-        )
+        msg = t("tasks.reply_to_select") + " " + t("tasks.use_cmd_s_arg")
         await send_message(message, msg)
         return
     if (
@@ -54,10 +51,10 @@ async def select(_, message):
         and task.listener.user_id != user_id
         and (user_id not in user_data or not user_data[user_id].get("SUDO"))
     ):
-        await send_message(message, "This task is not for you!")
+        await send_message(message, t("errors.task_not_yours"))
         return
     if not iscoroutinefunction(task.status):
-        await send_message(message, "The task have finished the download stage!")
+        await send_message(message, t("misc.task_download_finished"))
         return
     if await task.status() not in [
         MirrorStatus.STATUS_DOWNLOAD,
@@ -66,11 +63,11 @@ async def select(_, message):
     ]:
         await send_message(
             message,
-            "Task should be in download or pause (incase message deleted by wrong) or queued status (incase you have used torrent or nzb file)!",
+            t("tasks.task_should_be_downloading"),
         )
         return
     if task.name().startswith("[METADATA]") or task.name().startswith("Trying"):
-        await send_message(message, "Try after downloading metadata finished!")
+        await send_message(message, t("tasks.try_after_metadata"))
         return
 
     try:
@@ -91,11 +88,11 @@ async def select(_, message):
                     )
         task.listener.select = True
     except:
-        await send_message(message, "This is not a bittorrent or sabnzbd task!")
+        await send_message(message, t("errors.not_bittorrent_task"))
         return
 
     SBUTTONS = bt_selection_buttons(id_)
-    msg = "Your download paused. Choose files then press Done Selecting button to resume downloading."
+    msg = t("tasks.download_paused_select")
     await send_message(message, msg, SBUTTONS)
 
 
@@ -106,11 +103,11 @@ async def confirm_selection(_, query):
     message = query.message
     task = await get_task_by_gid(data[2])
     if task is None:
-        await query.answer("This task has been cancelled!", show_alert=True)
+        await query.answer(t("errors.task_cancelled"), show_alert=True)
         await delete_message(message)
         return
     if user_id != task.listener.user_id:
-        await query.answer("This task is not for you!", show_alert=True)
+        await query.answer(t("errors.task_not_yours"), show_alert=True)
     elif data[1] == "pin":
         await query.answer(data[3], show_alert=True)
     elif data[1] == "done":

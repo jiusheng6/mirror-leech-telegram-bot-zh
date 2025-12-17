@@ -1,5 +1,6 @@
 from time import time
 
+from ..helper.i18n import t
 from ..helper.ext_utils.bot_utils import new_task
 from ..helper.telegram_helper.button_build import ButtonMaker
 from ..helper.telegram_helper.message_utils import send_message, edit_message, send_file
@@ -32,7 +33,7 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 @new_task
 async def ping(_, message):
     start_time = int(round(time() * 1000))
-    reply = await send_message(message, "Starting Ping")
+    reply = await send_message(message, t("misc.starting_ping"))
     end_time = int(round(time() * 1000))
     await edit_message(reply, f"{end_time - start_time} ms")
 

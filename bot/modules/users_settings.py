@@ -9,6 +9,7 @@ from pyrogram.handlers import MessageHandler
 from time import time
 from re import findall
 
+from ..helper.i18n import t
 from .. import (
     user_data,
     excluded_extensions,
@@ -395,7 +396,7 @@ async def add_one(_, message, option):
             await send_message(message, str(e))
             return
     else:
-        await send_message(message, "It must be dict!")
+        await send_message(message, t("errors.must_be_dict"))
         return
     await delete_message(message)
     await database.update_user_data(user_id)
@@ -445,7 +446,7 @@ async def set_option(_, message, option):
                 await send_message(message, str(e))
                 return
         else:
-            await send_message(message, "It must be dict!")
+            await send_message(message, t("errors.must_be_dict"))
             return
     update_user_ldata(user_id, option, value)
     await delete_message(message)
@@ -605,7 +606,7 @@ async def edit_user_settings(client, query):
     token_pickle = f"tokens/{user_id}.pickle"
     user_dict = user_data.get(user_id, {})
     if user_id != int(data[1]):
-        await query.answer("Not Yours!", show_alert=True)
+        await query.answer(t("notify.not_yours"), show_alert=True)
     elif data[2] == "setevent":
         await query.answer()
     elif data[2] in ["leech", "gdrive", "rclone"]:
@@ -678,7 +679,7 @@ async def edit_user_settings(client, query):
         await event_handler(client, query, pfunc)
         await get_menu(data[3], message, user_id)
     elif data[2] == "remove":
-        await query.answer("Removed!", show_alert=True)
+        await query.answer(t("notify.removed"), show_alert=True)
         if data[3] in ["THUMBNAIL", "RCLONE_CONFIG", "TOKEN_PICKLE"]:
             if data[3] == "THUMBNAIL":
                 fpath = thumb_path
@@ -694,7 +695,7 @@ async def edit_user_settings(client, query):
             update_user_ldata(user_id, data[3], "")
             await database.update_user_data(user_id)
     elif data[2] == "reset":
-        await query.answer("Reseted!", show_alert=True)
+        await query.answer(t("notify.reseted"), show_alert=True)
         if data[3] in user_dict:
             del user_dict[data[3]]
         else:
@@ -753,7 +754,7 @@ async def get_users_settings(_, message):
             ):
                 msg += kmsg + vmsg
         if not msg:
-            await send_message(message, "No users data!")
+            await send_message(message, t("misc.no_users_data"))
             return
         msg_ecd = msg.encode()
         if len(msg_ecd) > 4000:
@@ -763,4 +764,4 @@ async def get_users_settings(_, message):
         else:
             await send_message(message, msg)
     else:
-        await send_message(message, "No users data!")
+        await send_message(message, t("misc.no_users_data"))

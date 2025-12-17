@@ -4,6 +4,7 @@ from aiofiles.os import path as aiopath, remove
 from asyncio import gather, create_subprocess_exec
 from os import execl as osexecl
 
+from ..helper.i18n import t
 from .. import intervals, scheduler, sabnzbd_client, LOGGER
 from ..helper.ext_utils.bot_utils import new_task
 from ..helper.telegram_helper.message_utils import (
@@ -25,12 +26,12 @@ async def restart_bot(_, message):
     buttons.data_button("Yes!", "botrestart confirm")
     buttons.data_button("Cancel", "botrestart cancel")
     button = buttons.build_menu(2)
-    await send_message(message, "Are you sure you want to restart the bot ?!", button)
+    await send_message(message, t("tasks.confirm_restart"), button)
 
 
 async def send_incomplete_task_message(cid, msg_id, msg):
     try:
-        if msg.startswith("Restarted Successfully!"):
+        if msg.startswith(t("notify.restarted_successfully")):
             await TgClient.bot.edit_message_text(
                 chat_id=cid,
                 message_id=msg_id,
@@ -57,7 +58,7 @@ async def restart_notification():
     if Config.INCOMPLETE_TASK_NOTIFIER and Config.DATABASE_URL:
         if notifier_dict := await database.get_incomplete_tasks():
             for cid, data in notifier_dict.items():
-                msg = "Restarted Successfully!" if cid == chat_id else "Bot Restarted!"
+                msg = t("notify.restarted_successfully") if cid == chat_id else t("notify.bot_restarted")
                 for tag, links in data.items():
                     msg += f"\n\n{tag}: "
                     for index, link in enumerate(links, start=1):
@@ -71,7 +72,7 @@ async def restart_notification():
     if await aiopath.isfile(".restartmsg"):
         try:
             await TgClient.bot.edit_message_text(
-                chat_id=chat_id, message_id=msg_id, text="Restarted Successfully!"
+                chat_id=chat_id, message_id=msg_id, text=t("notify.restarted_successfully")
             )
         except:
             pass
@@ -86,7 +87,7 @@ async def confirm_restart(_, query):
     if data[1] == "confirm":
         reply_to = message.reply_to_message
         intervals["stopAll"] = True
-        restart_message = await send_message(reply_to, "Restarting...")
+        restart_message = await send_message(reply_to, t("misc.restarting"))
         await delete_message(message)
         await TgClient.stop()
         if scheduler.running:

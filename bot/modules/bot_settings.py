@@ -14,6 +14,8 @@ from pyrogram.filters import create
 from pyrogram.handlers import MessageHandler
 from time import time
 
+from ..helper.i18n import t
+
 from .. import (
     LOGGER,
     drives_ids,
@@ -401,18 +403,18 @@ async def edit_nzb_server(_, message, pre_message, key, index=0):
             try:
                 value = eval(value)
             except:
-                await send_message(message, "Invalid dict format!")
+                await send_message(message, t("bot_settings.invalid_dict_format"))
                 await update_buttons(pre_message, "nzbserver")
                 return
             res = await sabnzbd_client.add_server(value)
             if not res["config"]["servers"][0]["host"]:
-                await send_message(message, "Invalid server!")
+                await send_message(message, t("bot_settings.invalid_server"))
                 await update_buttons(pre_message, "nzbserver")
                 return
             Config.USENET_SERVERS.append(value)
             await update_buttons(pre_message, "nzbserver")
         else:
-            await send_message(message, "Invalid dict format!")
+            await send_message(message, t("bot_settings.invalid_dict_format"))
             await update_buttons(pre_message, "nzbserver")
             return
     else:
@@ -422,7 +424,7 @@ async def edit_nzb_server(_, message, pre_message, key, index=0):
             {"name": Config.USENET_SERVERS[index]["name"], key: value}
         )
         if res["config"]["servers"][0][key] == "":
-            await send_message(message, "Invalid value")
+            await send_message(message, t("bot_settings.invalid_value"))
             return
         Config.USENET_SERVERS[index][key] = value
         await update_buttons(pre_message, f"nzbser{index}")
@@ -560,12 +562,12 @@ async def edit_bot_settings(client, query):
     elif data[1] == "syncjd":
         if not Config.JD_EMAIL or not Config.JD_PASS:
             await query.answer(
-                "No Email or Password provided!",
+                t("errors.no_email_password"),
                 show_alert=True,
             )
             return
         await query.answer(
-            "Synchronization Started. JDownloader will get restarted. It takes up to 10 sec!",
+            t("errors.sync_jd_started_10sec"),
             show_alert=True,
         )
         await sync_jdownloader()
@@ -663,14 +665,14 @@ async def edit_bot_settings(client, query):
         await database.update_nzb_config()
     elif data[1] == "syncnzb":
         await query.answer(
-            "Synchronization Started. It takes up to 2 sec!", show_alert=True
+            t("errors.sync_started_2sec"), show_alert=True
         )
         nzb_options.clear()
         await update_nzb_options()
         await database.update_nzb_config()
     elif data[1] == "syncqbit":
         await query.answer(
-            "Synchronization Started. It takes up to 2 sec!", show_alert=True
+            t("errors.sync_started_2sec"), show_alert=True
         )
         qbit_options.clear()
         await update_qb_options()

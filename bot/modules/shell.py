@@ -1,5 +1,6 @@
 from io import BytesIO
 
+from ..helper.i18n import t
 from .. import LOGGER
 from ..helper.ext_utils.bot_utils import cmd_exec, new_task
 from ..helper.telegram_helper.message_utils import send_message, send_file
@@ -9,7 +10,7 @@ from ..helper.telegram_helper.message_utils import send_message, send_file
 async def run_shell(_, message):
     cmd = message.text.split(maxsplit=1)
     if len(cmd) == 1:
-        await send_message(message, "No command to execute was given.")
+        await send_message(message, t("errors.no_command_given"))
         return
     cmd = cmd[1]
     stdout, stderr, _ = await cmd_exec(cmd, shell=True)
@@ -27,4 +28,4 @@ async def run_shell(_, message):
     elif len(reply) != 0:
         await send_message(message, reply)
     else:
-        await send_message(message, "No Reply")
+        await send_message(message, t("shell.no_reply"))

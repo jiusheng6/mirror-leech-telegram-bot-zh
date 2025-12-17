@@ -4,6 +4,7 @@ OWNER_ID = 0
 TELEGRAM_API = 0
 TELEGRAM_HASH = ""
 # OPTIONAL CONFIG
+LANGUAGE = "zh-CN"  # Bot language: en (English) or zh-CN (Chinese)
 TG_PROXY = {}
 USER_SESSION_STRING = ""
 CMD_SUFFIX = ""

@@ -1,3 +1,4 @@
+from ..helper.i18n import t
 from .. import user_data
 from ..helper.ext_utils.bot_utils import update_user_ldata, new_task
 from ..helper.ext_utils.db_handler import database
@@ -30,19 +31,19 @@ async def authorize(_, message):
                 and thread_id in user_data[chat_id].get("thread_ids", [])
                 or thread_id is None
             ):
-                msg = "Already Authorized!"
+                msg = t("notify.already_authorized")
             else:
                 if "thread_ids" in user_data[chat_id]:
                     user_data[chat_id]["thread_ids"].append(thread_id)
                 else:
                     user_data[chat_id]["thread_ids"] = [thread_id]
-                msg = "Authorized"
+                msg = t("notify.authorized")
         else:
             update_user_ldata(chat_id, "AUTH", True)
             if thread_id is not None:
                 update_user_ldata(chat_id, "thread_ids", [thread_id])
             await database.update_user_data(chat_id)
-            msg = "Authorized"
+            msg = t("notify.authorized")
     except Exception as e:
         msg = f"Error: {e}"
     await send_message(message, msg)
@@ -76,9 +77,9 @@ async def unauthorize(_, message):
             else:
                 update_user_ldata(chat_id, "AUTH", False)
             await database.update_user_data(chat_id)
-            msg = "Unauthorized"
+            msg = t("notify.unauthorized")
         else:
-            msg = "Already Unauthorized! Authorized Chats added from config must be removed from config."
+            msg = t("notify.already_unauthorized")
     except Exception as e:
         msg = f"Error: {e}"
     await send_message(message, msg)
@@ -95,13 +96,13 @@ async def add_sudo(_, message):
             id_ = reply_to.from_user.id if reply_to.from_user else reply_to.sender_chat.id
         if id_:
             if id_ in user_data and user_data[id_].get("SUDO"):
-                msg = "Already Sudo!"
+                msg = t("notify.already_sudo")
             else:
                 update_user_ldata(id_, "SUDO", True)
                 await database.update_user_data(id_)
-                msg = "Promoted as Sudo"
+                msg = t("notify.promoted_sudo")
         else:
-            msg = "Give ID or Reply To message of whom you want to Promote."
+            msg = t("notify.give_id_promote")
     except Exception as e:
         msg = f"Error: {e}"
     await send_message(message, msg)
@@ -120,11 +121,11 @@ async def remove_sudo(_, message):
             if id_ in user_data and user_data[id_].get("SUDO"):
                 update_user_ldata(id_, "SUDO", False)
                 await database.update_user_data(id_)
-                msg = "Demoted"
+                msg = t("notify.demoted")
             else:
-                msg = "Already Not Sudo! Sudo users added from config must be removed from config."
+                msg = t("notify.already_not_sudo")
         else:
-            msg = "Give ID or Reply To message of whom you want to remove from Sudo"
+            msg = t("notify.give_id_remove_sudo")
     except Exception as e:
         msg = f"Error: {e}"
     await send_message(message, msg)

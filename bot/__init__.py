@@ -16,6 +16,21 @@ from sabnzbdapi import SabnzbdClient
 from time import time
 from os import cpu_count
 
+# Initialize i18n
+from .helper.i18n import init_i18n, set_language
+try:
+    from config import LANGUAGE
+    init_i18n(LANGUAGE)
+    set_language(LANGUAGE)
+    LOGGER_I18N = getLogger(__name__)
+    LOGGER_I18N.info(f"Language set to: {LANGUAGE}")
+except Exception as e:
+    # Fallback to Chinese if config not found or error occurs
+    init_i18n("zh-CN")
+    set_language("zh-CN")
+    LOGGER_I18N_ERR = getLogger(__name__)
+    LOGGER_I18N_ERR.warning(f"Failed to set language from config, using Chinese: {e}")
+
 getLogger("requests").setLevel(WARNING)
 getLogger("urllib3").setLevel(WARNING)
 getLogger("pyrogram").setLevel(ERROR)
